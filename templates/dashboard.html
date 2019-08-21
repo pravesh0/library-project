@@ -1,0 +1,46 @@
+<html>
+    <head>
+        <title>Library Dashboard</title>
+        <link rel="stylesheet" href="static/dashboardstyle.css">
+    </head>
+
+    <body>
+        <div>
+                <center><h1>Library Management System</h1></center>
+
+            <div class="header">
+                <button class="mydivs">Books</button>
+                <button class="mydivs">No Dues</button>
+                <button class="mydivs">Issued Books</button>
+            </div>
+            <div class="mydivs">
+                <center>
+
+                    <form action="student_details" method = "POST">
+                  <b>Student Roll no.</b><input type="text" name="roll_no" class="mydivs">
+                  <button class="mydivs">Search</button></form>
+                </center>
+            </div>
+            <div class="mydivs">
+                <div class="mydivs2">
+                    <form>
+                        <output><b>Student Name : {{ n }}</b></output><br><br>
+                        <output><b>Student Roll No. : {{ r }}</b></output><br><br>
+                        <output><b>Branch : {{ b }}</b></output><br><br>
+                        <output><b>Issued Books : {{ i }}</b></output><br><br>
+                    </form>
+                </div>
+                <div class="mydivs2">
+                    <form action="issued_book" method="POST">
+                     <b>Issue book</b><br><br>
+                        Issue ID : <input type = "text" name="issued_id" class="mydivs"><br>
+                        Book ID : <input type = "text" name="book_id" class="mydivs"><br>
+                        Student Roll NO. : <input type = "text" name="roll_no" class="mydivs"><br>
+                     <button class="mydivs" >Issue it</button>
+                    </form>
+                </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
