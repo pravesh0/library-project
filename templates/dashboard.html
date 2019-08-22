@@ -1,46 +1,128 @@
 <html>
-    <head>
-        <title>Library Dashboard</title>
-        <link rel="stylesheet" href="static/dashboardstyle.css">
-    </head>
+<head>
+    <title>Library Dashboard</title>
+    <link href="static/dashboardstyle.css" rel="stylesheet">
+    <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" rel="stylesheet">
+    <script crossorigin="anonymous" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+            src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <style>
+        .container {
+  width: 900px;
+  height: 900px;
+}
 
-    <body>
-        <div>
-                <center><h1>Library Management System</h1></center>
+header {
+  width:900px;
+  background: #b8decf;
+  height: 50px;
+}
 
-            <div class="header">
-                <button class="mydivs">Books</button>
-                <button class="mydivs">No Dues</button>
-                <button class="mydivs">Issued Books</button>
-            </div>
-            <div class="mydivs">
-                <center>
+.menu {
+  float: right;
+  padding: 15px
+}
 
-                    <form action="student_details" method = "POST">
-                  <b>Student Roll no.</b><input type="text" name="roll_no" class="mydivs">
-                  <button class="mydivs">Search</button></form>
-                </center>
-            </div>
-            <div class="mydivs">
-                <div class="mydivs2">
-                    <form>
-                        <output><b>Student Name : {{ n }}</b></output><br><br>
-                        <output><b>Student Roll No. : {{ r }}</b></output><br><br>
-                        <output><b>Branch : {{ b }}</b></output><br><br>
-                        <output><b>Issued Books : {{ i }}</b></output><br><br>
-                    </form>
-                </div>
-                <div class="mydivs2">
-                    <form action="issued_book" method="POST">
-                     <b>Issue book</b><br><br>
-                        Issue ID : <input type = "text" name="issued_id" class="mydivs"><br>
-                        Book ID : <input type = "text" name="book_id" class="mydivs"><br>
-                        Student Roll NO. : <input type = "text" name="roll_no" class="mydivs"><br>
-                     <button class="mydivs" >Issue it</button>
-                    </form>
-                </div>
-                </div>
-            </div>
-        </div>
-    </body>
+.first-box {
+  width:400px;
+  float:left;
+  background: #b8decf;
+  height: 250px;
+  margin: 10px
+}
+
+.second-box {
+  width:400px;
+  height: 250px;
+  float:right;
+  background: #e6bcbc;
+  margin: 10px
+}
+
+
+
+
+
+
+    </style>
+</head>
+
+<body>
+<center><h1>Library Management System</h1></center>
+<div class="container">
+    <center>
+        <form action="student_details" method="POST">
+            <b>Student Roll no. &nbsp&nbsp&nbsp&nbsp&nbsp</b><input class="mydivs" name="roll_no" type="text">
+            <button class="mydivs">Search</button>
+        </form>
+    </center>
+    <div class="header">
+        <h1>{% with messages = get_flashed_messages()%} {% for message in messages%}{{ message }} {% endfor
+            %}{%endwith%}</h1>
+    </div>
+    <div class="header">
+        <form action="books" method="POST">
+            <button class="mydivs">Books</button>
+        </form>
+        <form action="fine" method="POST">
+            <button class="mydivs">No Dues</button>
+        </form>
+        <form action="total_issues" method="POST">
+            <button class="mydivs">Issued Books</button>
+        </form>
+    </div>
+    <div class="first-box">
+        <form>
+            <output><b>Student Name &nbsp&nbsp&nbsp&nbsp: &nbsp&nbsp&nbsp&nbsp&nbsp{{ n }}</b></output>
+            <br><br>
+            <output><b>Student Roll No. &nbsp: &nbsp&nbsp&nbsp&nbsp&nbsp{{ r }}</b></output>
+            <br><br>
+            <output><b>Branch &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp:
+                &nbsp&nbsp&nbsp&nbsp&nbsp{{ b }}</b></output>
+            <br><br>
+            <output><b>Issued Books &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: &nbsp&nbsp&nbsp&nbsp&nbsp{% for j in i%}{{ j }}{%
+                endfor %}</b></output>
+            <br><br>
+            <output><b>Student fine &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: &nbsp&nbsp&nbsp&nbsp&nbsp{{ f }}</b></output>
+            <br><br>
+        </form>
+    </div>
+    <div class="second-box">
+        <form action="issued_book" method="POST">
+            <center><b>Issue book</b><br><br></center>
+            Book ID : &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<input class="mydivs"
+                                                                                              name="book_id"
+                                                                                              type="text"><br><br>
+            Student Roll No. : <input class="mydivs" name="roll_no" type="text"><br><br>
+            <center>
+                <button class="mydivs">Issue it</button>
+            </center>
+        </form>
+    </div>
+    <div class="first-box">
+        <form action="reissue_book" method="POST">
+            <center><b>Re-issue book</b><br><br></center>
+            Book ID : &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<input class="mydivs"
+                                                                                              name="book_id"
+                                                                                              type="text"><br><br>
+            Student Roll No. : <input class="mydivs" name="roll_no" type="text"><br><br>
+            <center>
+                <button class="mydivs">Re-issue it</button>
+            </center>
+        </form>
+    </div>
+    <div class="second-box">
+        <form action="return_book" method="POST">
+            <center><b>Return Book</b><br><br></center>
+            Book ID : &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp<input class="mydivs"
+                                                                                              name="book_id"
+                                                                                              type="text"><br><br>
+            Student Roll NO. : <input class="mydivs" name="roll_no" type="text"><br><br>
+            <center>
+                <button class="mydivs">Return it</button>
+            </center>
+        </form>
+    </div>
+</div>
+</body>
 </html>
