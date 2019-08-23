@@ -1,11 +1,9 @@
-from flask import Flask, render_template, flash, redirect, request, url_for, session
+from flask import Flask, render_template, flash, redirect, request, session
 import pymysql
 
 fine_query = """select students.roll_no, students.name, students.course, students.sem, f.fine
-
             from students
             left join 
-            
             (
             select roll_no, sum(t_fine) as fine
             from 
@@ -15,27 +13,24 @@ fine_query = """select students.roll_no, students.name, students.course, student
                     case
                         when datediff(now(), issued_date) > 15 then
                             (datediff(now(), issued_date) - 15)*5
-                        else 
-                            0
-                    end
-                    
+                        else                            0
+                    end    
                 when datediff(return_date, issued_date) > 15 then
                     (datediff(return_date, issued_date) - 15)*5
                 else
-                    0
-            
+                    0 
             end as t_fine
-            
             from issued) as fine_total
             group by roll_no
             ) as f
              on students.roll_no = f.roll_no;
 """
-# making connection of python file with mysql
-connect = pymysql.connect(host="localhost", user="root", passwd="", db="library",
-                          use_unicode=True, charset="utf8", cursorclass=pymysql.cursors.DictCursor)
+
+
+conn = pymysql.connect(host="localhost", user="root", passwd="root", db="library",
+                       use_unicode=True, charset="utf8", cursorclass=pymysql.cursors.DictCursor)
 # if cursorclass is not used then the data we fetch will get in tuple form.
-cursor = connect.cursor()  # setup of cursor
+cursor = conn.cursor()  # setup of cursor
 
 app = Flask(__name__)  # initializing the Flask class in flask library
 
@@ -48,7 +43,7 @@ def login():
         password_candidate = request.form['password']  # password get from the form
         sql = "select password from librarians where username = %s"
         data = cursor.execute(sql, args=username)  # taking data from the database related to the username and password
-        if data == 1:  # if data exist
+        if data == 1:  # if username is correct
             password_in_data = cursor.fetchone()  # fetch the value
             compare_password = password_in_data['password']
             if compare_password == password_candidate:
@@ -56,11 +51,13 @@ def login():
                 session['username'] = username
                 return render_template('dashboard.html')
             else:
-                flash('Password Invalid')
+                flash('Invalid Password!')
+                flash('Please Try Again!')
                 return render_template('login.html')
-        else:
-            error = 'Username not found'
-        return render_template('login.html', error=error)
+        else:   # if username is incorrect
+            flash(u"Invalid Username!", 'error')
+            flash("Please Try Again!")
+            return render_template('login.html', )
     return render_template('login.html')
 
 
@@ -73,76 +70,109 @@ def dashboard():
 @app.route('/student_details', methods=['GET', 'POST'])
 def student_details():
     if request.method == 'POST':
-        roll_no = int(request.form['roll_no'])
-        n = cursor.execute("select * from students where roll_no = %s", args=roll_no)
-        if n > 0:
-            details = cursor.fetchone()
-            detail = list(details.values())
-            name = detail[1]
-            Roll_no = detail[0]
-            branch = detail[2]
-            sql = "select issued.roll_no, issued.book_id, books.name from issued inner join books on " \
-                  "issued.book_id = books.book_id where return_date = '0000-00-00 00:00:00'"
-            cursor.execute(sql)
-            books = cursor.fetchall()
-            issued_book = []
-            cursor.execute(fine_query)
-            data = cursor.fetchall()
-            s_fine = 0
-            for d in data:
-                if d['roll_no'] == roll_no:
-                    s_fine = d['fine']
-            if books:
-                print(books)
-                for book in books:
-                    a = list(book.values())
-                    if a[0] == roll_no:
-                        issued_book.append(a[2])
+        try:
+            form_roll_no = int(request.form['roll_no'])
+            n = cursor.execute("select * from students where roll_no = %s", args=form_roll_no)
+            if n > 0:
+                details = cursor.fetchone()
+                detail = list(details.values())
+                name = detail[1]
+                Roll_no = detail[0]
+                branch = detail[2]
+                sql = "select issued.roll_no, issued.book_id, books.name from issued inner join books on " \
+                      "issued.book_id = books.book_id where return_date = '0000-00-00 00:00:00'"
+                cursor.execute(sql)
+                books = cursor.fetchall()
+                issued_book = []
+                cursor.execute(fine_query)
+                data = cursor.fetchall()
+                s_fine = 0
+                for d in data:
+                    if d['roll_no'] == form_roll_no:
+                        s_fine = d['fine']
+                if books:
+                    print(books)
+                    for book in books:
+                        a = list(book.values())
+                        if a[0] == form_roll_no:
+                            issued_book.append(a[2])
 
-            return render_template('dashboard.html', n=name, r=Roll_no, b=branch, i=issued_book, bo=books, f=s_fine)
-        else:
-            flash("Searched Roll no. does not exist")
-            return render_template('dashboard.html')
+                return render_template('dashboard.html', n=name, r=Roll_no, branch=branch, i=issued_book, bo=books, f=s_fine)
+            else:
+                flash(" doesn't exist!")
+                error = 'Invalid RollNo'
+                return render_template('dashboard.html', error=error, rn=form_roll_no)
+        except Exception:
+            flash("Please Enter a valid number.")
+            error = 'except'
+            return render_template('dashboard.html', error=error,)
 
 
 @app.route('/issued_book', methods=['GET', 'POST'])
 def issued_book():
     if request.method == 'POST':
-        roll_no = int(request.form['roll_no'])
-        book_id = int(request.form['book_id'])
-        cursor.execute("insert into issued(roll_no, book_id) values(%s, %s)",
-                       args=(roll_no, book_id))
-        connect.commit()
 
-        return render_template('dashboard.html'), flash("Book is Issued Successfully", 'success')
+        try:
+            roll_no = int(request.form['roll_no'])
+            book_id = int(request.form['book_id'])
+            duplicate = cursor.execute("select * from issued where roll_no = %s and book_id = %s and return_date= '0000-00-00 00:00:00'", args=(roll_no, book_id))
+            rows = 0
+            if duplicate == 0:
+                rows = cursor.execute("insert into issued(roll_no, book_id) values(%s, %s)",
+                       args=(roll_no, book_id))
+        except Exception:
+            rows = 0
+            duplicate = 0
+        finally:
+            conn.commit()
+            if rows == 1:
+                return render_template('dashboard.html', b=book_id, rn=roll_no, s='success in issuing')
+            else:
+                return render_template('dashboard.html', s='error in issuing')
 
 
 @app.route('/reissue_book', methods=['GET', 'POST'])
 def reissue_book():
     if request.method == 'POST':
-        roll_no = int(request.form['roll_no'])
-        book_id = int(request.form['book_id'])
-        sql = "update issued set return_date=now() where roll_no = %s and book_id = %s and return_date = '0000-00-00 00:00:00'"
-        cursor.execute(sql, args=(roll_no, book_id))
-        sql = "insert into issued (roll_no, book_id) values (%s, %s)"
-        cursor.execute(sql, args=(roll_no, book_id))
+        try:
+            roll_no = int(request.form['roll_no'])
+            book_id = int(request.form['book_id'])
+            sql = "update issued set return_date=now() where roll_no = %s and book_id = %s and return_date = '0000-00-00 00:00:00'"
+            row = cursor.execute(sql, args=(roll_no, book_id))
+            sql = "insert into issued (roll_no, book_id) values (%s, %s)"
+            cursor.execute(sql, args=(roll_no, book_id))
 
-        connect.commit()
+            conn.commit()
+        except Exception:
+            row = 0
+        finally:
+            if row==1:
+                return render_template('dashboard.html', s='success in reissuing', b=book_id, rn=roll_no)
+            else:
+                return render_template('dashboard.html', s='error in reissuing')
 
-        return render_template('dashboard.html'), flash("Book is re-Issued Successfully", 'success')
+    return render_template('dashboard.html')
 
 
 @app.route('/return_book', methods=['GET', 'POST'])
 def return_book():
     if request.method == 'POST':
-        roll_no = int(request.form['roll_no'])
-        book_id = int(request.form['book_id'])
-        print(roll_no, book_id)
-        sql = "update issued set return_date=now() where roll_no = %s and book_id = %s and return_date = '0000-00-00 00:00:00'"
-        cursor.execute(sql, args=(roll_no, book_id))
-        connect.commit()
+        try:
+            roll_no = int(request.form['roll_no'])
+            book_id = int(request.form['book_id'])
+            print(roll_no, book_id)
+            sql = "update issued set return_date=now() where roll_no = %s and book_id = %s and return_date = '0000-00-00 00:00:00'"
+            row = cursor.execute(sql, args=(roll_no, book_id))
+            conn.commit()
 
-        return render_template('dashboard.html'), flash("Book is returned Successfully", 'success')
+        except Exception:
+            row = 0
+        finally:
+            if row==1:
+                return render_template('dashboard.html', s='success in returning', b=book_id, rn=roll_no)
+            else:
+                return render_template('dashboard.html', s='error in returning')
+
 
 
 @app.route('/fine', methods=['GET', 'POST'])

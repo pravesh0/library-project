@@ -1,38 +1,38 @@
-<html>
-<head>
-        <title>Fine</title>
-        <link href="static/dashboardstyle.css" rel="stylesheet">
-        <link crossorigin="anonymous" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" rel="stylesheet">
-<script crossorigin="anonymous" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
-    </head>
-<body>
-<center>
-    <form action="dashboard" method="POST">
-        <button>Back on Dashboard</button>
-    </form>
-</center>
-<table class="table">
-  <thead>
-    <tr>
-      <th scope="col">S No.</th>
-      <th scope="col">Student Name</th>
-      <th scope="col">Student Roll No.</th>
-      <th scope="col">Book Id</th>
-      <th scope="col">Book Name</th>
-    </tr>
-  </thead>
-  <tbody>
-  {% for x in d%}
-    <tr>
-      <th scope="row">{{ loop.index0 + 1}}</th>
-      <td>{{x['student_name']}}</td>
-      <td>{{x['roll_no']}}</td>
-      <td>{{x['book_id']}}</td>
-      <td>{{x['book_name']}}</td>
-    </tr>
-  {% endfor %}
+{% extends "base.html" %}
 
-  </tbody>
+{% block title %}
+    Total Books Issued
+{% endblock %}
+
+{% block body %}
+
+    <form action="dashboard" method="POST">
+        <button class="btn btn-secondary">Back on Dashboard</button>
+
+    </form>
+
+    <br>
+<table class="table table-bordered table-striped ">
+    <thead class="thead-light">
+    <tr>
+        <th scope="col">S No.</th>
+        <th scope="col">Student Name</th>
+        <th scope="col">Student Roll No.</th>
+        <th scope="col">Book Id</th>
+        <th scope="col">Book Name</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for x in d %}
+        <tr>
+            <th scope="row">{{ loop.index0 + 1 }}</th>
+            <td>{{ x['student_name'] }}</td>
+            <td>{{ x['roll_no'] }}</td>
+            <td>{{ x['book_id'] }}</td>
+            <td>{{ x['book_name'] }}</td>
+        </tr>
+    {% endfor %}
+
+    </tbody>
 </table>
-</body>
-</html>
+{% endblock %}
